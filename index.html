@@ -39,13 +39,23 @@ $2.popup-form small {$3}
   <script type="module">
     // === 1) Replace with your Firebase web app config ===
     const firebaseConfig = {
-    apiKey: "AIzaSyAyNQgyHtbwMeGssezbPsJpN4uzeVtv9N4",
-    authDomain: "paramount-candy.firebaseapp.com",
-    projectId: "paramount-candy",
-    storageBucket: "paramount-candy.firebasestorage.app",
-    messagingSenderId: "118642153330",
-    appId: "1:118642153330:web:a9e66320d3344797bbafeb"
-  };
+      apiKey: "AIzaSyAyNQgyHtbwMeGssezbPsJpN4uzeVtv9N4",
+      authDomain: "paramount-candy.firebaseapp.com",
+      projectId: "paramount-candy",
+      storageBucket: "paramount-candy.firebasestorage.app",
+      messagingSenderId: "118642153330",
+      appId: "1:118642153330:web:a9e66320d3344797bbafeb"
+    };
+
+    // Basic runtime error overlay so the page never looks "blank"
+    function showRuntimeError(message) {
+      const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;inset:12px;z-index:99999;background:#fee2e2;border:1px solid #ef4444;color:#7f1d1d;padding:12px;border-radius:12px;font-family:system-ui;max-width:680px;box-shadow:0 10px 30px rgba(0,0,0,.2);';
+      el.innerHTML = '<strong>There\'s a setup issue</strong><br>' + message + '<br><small>Open your browser console for details. The map itself is still on the page.</small>';
+      document.body.appendChild(el);
+    }
+    window.addEventListener('error', (e) => showRuntimeError(e.message));
+    window.addEventListener('unhandledrejection', (e) => showRuntimeError(e.reason && e.reason.message ? e.reason.message : 'Unknown error'));
 
 
     // === 2) City settings (Paramount, CA) ===
@@ -90,7 +100,9 @@ $2.popup-form small {$3}
     const db = getFirestore(app);
 
     // Sign in (anonymous)
-    await signInAnonymously(auth);
+    signInAnonymously(auth).catch(err => {
+      console.warn('Anonymous auth failed (you can still view pins):', err);
+    });
 
     // Realtime listener for all candy houses
     const markersLayer = L.layerGroup().addTo(map);
